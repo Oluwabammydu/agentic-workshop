@@ -2,18 +2,13 @@ import os
 
 from textwrap import dedent
 
-# from dotenv import load_dotenv
-
-# load_dotenv()
-
 from crewai import LLM, Agent, Crew, Task
 
-# Explicitly set the AWS_DEFAULT_REGION environment variable
-os.environ['AWS_DEFAULT_REGION'] = 'us-east-1'
+# Explicitly set the AWS_REGION environment variable
 os.environ['AWS_REGION'] = 'us-east-1'
 
 # Load Claude from Amazon Bedrock
-llm = LLM(model="bedrock/anthropic.claude-3-sonnet-20240229-v1:0", region_name= "us-east-1", temperature=0.7)
+llm = LLM(model="bedrock/anthropic.claude-3-sonnet-20240229-v1:0", temperature=0.7)
 
 
 class TravelListicleAgents:
