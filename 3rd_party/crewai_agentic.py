@@ -1,13 +1,19 @@
+import os
+
 from textwrap import dedent
 
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
-load_dotenv()
+# load_dotenv()
 
 from crewai import LLM, Agent, Crew, Task
 
+# Explicitly set the AWS_DEFAULT_REGION environment variable
+os.environ['AWS_DEFAULT_REGION'] = 'us-east-1'
+os.environ['AWS_REGION'] = 'us-east-1'
+
 # Load Claude from Amazon Bedrock
-llm = LLM(model="bedrock/anthropic.claude-3-sonnet-20240229-v1:0", temperature=0.7)
+llm = LLM(model="bedrock/anthropic.claude-3-sonnet-20240229-v1:0", region_name= "us-east-1", temperature=0.7)
 
 
 class TravelListicleAgents:
@@ -58,6 +64,16 @@ class TravelListicleAgents:
             verbose=True,
             llm=llm,
         )
+        
+    def local_expert_agent(self):
+        return Agent(
+            role="Local Expert",
+            goal="Provide insider tips and cultural context for the location",
+            backstory="You are a long-time resident of the location with deep knowledge of its hidden gems and local customs.",
+            allow_delegation=True,
+            verbose=True,
+            llm=llm,
+        )    
 
 
 class TravelListicleTasks:
@@ -80,23 +96,30 @@ class TravelListicleTasks:
             expected_output="Structured list of 15+ attractions/activities",
         )
 
+    # def write_listicle_task(self, agent, location):
+    #     return Task(
+    #         description=dedent(
+    #             f"""Create an engaging top 10 listicle article about things to 
+    #             do in {location}. Use the research provided to:
+    #             1. Write a catchy title and introduction (100-150 words)
+    #             2. Select and write about the top 10 activities/attractions
+    #             3. For each item, write 2-3 paragraphs (100-150 words total)
+    #             4. Include a brief conclusion (50-75 words)
+
+    #             Ensure the content is engaging, informative, and inspiring. 
+    #             Your final answer should be the complete listicle article.
+    #             """
+    #         ),
+    #         agent=agent,
+    #         expected_output="Complete top 10 listicle article",
+    #     )
+        
     def write_listicle_task(self, agent, location):
         return Task(
-            description=dedent(
-                f"""Create an engaging top 10 listicle article about things to 
-                do in {location}. Use the research provided to:
-                1. Write a catchy title and introduction (100-150 words)
-                2. Select and write about the top 10 activities/attractions
-                3. For each item, write 2-3 paragraphs (100-150 words total)
-                4. Include a brief conclusion (50-75 words)
-
-                Ensure the content is engaging, informative, and inspiring. 
-                Your final answer should be the complete listicle article.
-                """
-            ),
+            description=f"Create an engaging top 15 listicle article about things to do in {location}. Include a mix of popular attractions and off-the-beaten-path experiences...",
             agent=agent,
-            expected_output="Complete top 10 listicle article",
-        )
+            expected_output="Complete top 15 listicle article",
+        )    
 
     def edit_listicle_task(self, agent, location):
         return Task(
@@ -129,16 +152,19 @@ location = input("What location would you like to create a top 10 listicle for?\
 travel_researcher = agents.travel_researcher_agent()
 content_writer = agents.content_writer_agent()
 editor = agents.editor_agent()
+local_expert = agents.local_expert_agent()
 
 # Create Tasks
 research_location = tasks.research_task(travel_researcher, location)
 write_listicle = tasks.write_listicle_task(content_writer, location)
+local_content = tasks.write_listicle_task(local_expert, location)
 edit_listicle = tasks.edit_listicle_task(editor, location)
+
 
 # Create Crew for Listicle Production
 crew = Crew(
-    agents=[travel_researcher, content_writer, editor],
-    tasks=[research_location, write_listicle, edit_listicle],
+    agents=[travel_researcher, content_writer, editor, local_expert],
+    tasks=[research_location, write_listicle, local_content, edit_listicle],
     verbose=True,
 )
 
@@ -148,5 +174,5 @@ listicle_result = crew.kickoff()
 print("\n\n########################")
 print("## Here is the result")
 print("########################\n")
-print(f"Top 10 Things to Do in {location}:")
+print(f"Top 15 Things to Do in {location}:")
 print(listicle_result)
