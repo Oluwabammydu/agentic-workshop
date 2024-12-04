@@ -90,24 +90,6 @@ class TravelListicleTasks:
             agent=agent,
             expected_output="Structured list of 15+ attractions/activities",
         )
-
-    # def write_listicle_task(self, agent, location):
-    #     return Task(
-    #         description=dedent(
-    #             f"""Create an engaging top 10 listicle article about things to 
-    #             do in {location}. Use the research provided to:
-    #             1. Write a catchy title and introduction (100-150 words)
-    #             2. Select and write about the top 10 activities/attractions
-    #             3. For each item, write 2-3 paragraphs (100-150 words total)
-    #             4. Include a brief conclusion (50-75 words)
-
-    #             Ensure the content is engaging, informative, and inspiring. 
-    #             Your final answer should be the complete listicle article.
-    #             """
-    #         ),
-    #         agent=agent,
-    #         expected_output="Complete top 10 listicle article",
-    #     )
         
     def write_listicle_task(self, agent, location):
         return Task(
